@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // FUNCIONES AUXILIARES
+    // ============================================
+    
+    // Verificar si el usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Verificar si el usuario es miembro de la organización
+    function isMember(orgId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+    }
+    
+    // Obtener rol del usuario en la organización
+    function getMemberRole(orgId) {
+      return get(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data.role;
+    }
+    
+    // Verificar si el usuario tiene un rol específico
+    function hasRole(orgId, roles) {
+      return isMember(orgId) && getMemberRole(orgId) in roles;
+    }
+    
+    // Verificar si es owner o admin
+    function isAdminOrOwner(orgId) {
+      return hasRole(orgId, ['owner', 'admin']);
+    }
+    
+    // Verificar si puede escribir (owner, admin, operator)
+    function canWrite(orgId) {
+      return hasRole(orgId, ['owner', 'admin', 'operator']);
+    }
+    
+    // ============================================
+    // COLECCIÓN: users
+    // Documento global de usuario (lookup por userId)
+    // ============================================
+    match /users/{userId} {
+      // Cada usuario puede leer/crear su propio documento
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Solo puede actualizar ciertos campos de su propio perfil
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // ============================================
+    // COLECCIÓN: organizations
+    // ============================================
+    match /organizations/{orgId} {
+      // Cualquier usuario autenticado puede crear una organización
+      allow create: if isAuthenticated();
+      
+      // Solo miembros pueden leer la organización
+      allow read: if isMember(orgId);
+      
+      // Solo owner/admin pueden actualizar
+      allow update: if isAdminOrOwner(orgId);
+      
+      // Solo owner puede eliminar
+      allow delete: if hasRole(orgId, ['owner']);
+      
+      // ----------------------------------------
+      // SUBCOLECCIÓN: members
+      // Miembros de la organización
+      // ----------------------------------------
+      match /members/{memberId} {
+        // Miembros pueden ver otros miembros
+        allow read: if isMember(orgId);
+        
+        // Solo owner/admin pueden agregar miembros
+        // Excepción: el creador puede agregarse a sí mismo como owner
+        allow create: if isAuthenticated() && 
+          (request.auth.uid == memberId || isAdminOrOwner(orgId));
+        
+        // Solo owner/admin pueden actualizar roles
+        allow update: if isAdminOrOwner(orgId);
+        
+        // Solo owner puede eliminar miembros (excepto a sí mismo)
+        allow delete: if hasRole(orgId, ['owner']) && 
+          request.auth.uid != memberId;
+      }
+      
+      // ----------------------------------------
+      // SUBCOLECCIÓN: invitations
+      // Invitaciones pendientes
+      // ----------------------------------------
+      match /invitations/{invitationId} {
+        allow read: if isMember(orgId);
+        allow create: if isAdminOrOwner(orgId);
+        allow update: if isAdminOrOwner(orgId);
+        allow delete: if isAdminOrOwner(orgId);
+      }
+      
+      // ----------------------------------------
+      // COLECCIÓN: roadmap_cards
+      // Tarjetas del Kanban/Roadmap
+      // ----------------------------------------
+      match /roadmap_cards/{cardId} {
+        allow read: if isMember(orgId);
+        allow create, update: if canWrite(orgId);
+        allow delete: if isAdminOrOwner(orgId);
+      }
+      
+      // ----------------------------------------
+      // COLECCIONES CONTABLES
+      // ----------------------------------------
+      
+      // Cuentas contables (Plan de cuentas)
+      match /accounts/{accountId} {
+        allow read: if isMember(orgId);
+        allow create, update: if canWrite(orgId);
+        allow delete: if isAdminOrOwner(orgId);
+      }
+      
+      // Asientos contables
+      match /journal_entries/{entryId} {
+        allow read: if isMember(orgId);
+        allow create, update: if canWrite(orgId);
+        allow delete: if isAdminOrOwner(orgId);
+      }
+      
+      // Productos/Inventario
+      match /products/{productId} {
+        allow read: if isMember(orgId);
+        allow create, update: if canWrite(orgId);
+        allow delete: if isAdminOrOwner(orgId);
+      }
+      
+      // Movimientos de stock
+      match /stock_movements/{movementId} {
+        allow read: if isMember(orgId);
+        allow create, update: if canWrite(orgId);
+        allow delete: if isAdminOrOwner(orgId);
+      }
+      
+      // ----------------------------------------
+      // WILDCARD: Colecciones futuras
+      // ----------------------------------------
+      match /{collection}/{docId} {
+        allow read: if isMember(orgId);
+        allow write: if canWrite(orgId);
+      }
+    }
+  }
+}

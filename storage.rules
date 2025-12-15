@@ -1,0 +1,49 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Max file size: 10MB
+    function isValidSize() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+    
+    // Allowed content types
+    function isValidContentType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.*') ||
+             request.resource.contentType.matches('text/.*');
+    }
+    
+    // Organization files
+    match /organizations/{orgId}/{allPaths=**} {
+      // Read: any authenticated user that is member of org
+      // (Note: We can't check Firestore from Storage rules, so we rely on auth)
+      allow read: if isAuthenticated();
+      
+      // Write: authenticated users with valid file
+      allow write: if isAuthenticated() && isValidSize() && isValidContentType();
+    }
+    
+    // User profile pictures
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) && isValidSize() && request.resource.contentType.matches('image/.*');
+    }
+    
+    // Temporary uploads
+    match /temp/{userId}/{fileName} {
+      allow read, write: if isOwner(userId) && isValidSize();
+    }
+  }
+}

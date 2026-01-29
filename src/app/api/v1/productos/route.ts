@@ -10,6 +10,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/firebase/config';
 import { validateApiKey } from '@/lib/api-auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
     try {
         // Validate API key and get organization

@@ -1,55 +1,53 @@
-# Proyecto Base - Template Multi-Tenant
+# Don Cándido Finanzas
 
-Plantilla base reutilizable para crear aplicaciones SaaS multi-tenant con Next.js 14, Firebase, y TypeScript.
+**Sistema Contable Automático para Venta de Electrodomésticos**
 
-## 🚀 Características
+Sistema de gestión financiera y contable con generación automática de asientos de doble partida, gestión de stock y control de terceros (clientes/proveedores).
 
-- ✅ **Multi-Tenant**: Sistema de organizaciones con roles y permisos
-- ✅ **Autenticación**: Firebase Auth (Email/Password, Google)
-- ✅ **Kanban Roadmap**: Tablero de tareas con drag & drop
-- ✅ **Contabilidad**: Plan de cuentas, asientos contables, inventario
-- ✅ **TypeScript Estricto**: Tipado completo en todo el proyecto
-- ✅ **Testing**: Jest (unit), Playwright (e2e)
-- ✅ **CI/CD Ready**: GitHub Actions configurado
-- ✅ **Firebase CLI**: Emuladores y deployment
+---
+
+## 🚀 Características Principales
+
+- ✅ **Contabilidad Automática**: Asientos de doble partida generados automáticamente
+- ✅ **Gestión de Stock**: Control de inventario con entrada/salida de mercadería
+- ✅ **Terceros**: Gestión de clientes y proveedores con saldos automáticos
+- ✅ **Multi-Tenancy**: Sistema de organizaciones con roles y permisos
+- ✅ **Operaciones Financieras**: Ingresos, gastos, compras, pagos
+- ✅ **Trazabilidad**: Cada asiento vinculado a su operación original
+
+---
 
 ## 📦 Stack Tecnológico
 
-| Categoría | Tecnología                          |
-| --------- | ----------------------------------- |
-| Frontend  | Next.js 14, React 18, TypeScript    |
-| Backend   | Firebase (Firestore, Auth, Storage) |
-| Estilos   | Tailwind CSS v4, Radix UI           |
-| Testing   | Jest, Playwright, Testing Library   |
-| Linting   | ESLint, Prettier, Husky             |
+| Categoría | Tecnología |
+|-----------|------------|
+| Frontend  | Next.js 14, React 18, TypeScript |
+| Backend   | Firebase (Firestore, Auth) |
+| Estilos   | Tailwind CSS, shadcn/ui |
+| Contabilidad | Sistema de doble partida automático |
 
-## 🛠️ Instalación
+---
 
-### 1. Clonar y configurar
+## 🛠️ Instalación y Configuración
+
+### 1. Clonar e instalar
 
 ```bash
-# Clonar el repositorio
-git clone <repo-url> mi-proyecto
-cd mi-proyecto
-
-# Instalar dependencias
+git clone <repo-url> don-candido-finanzas
+cd don-candido-finanzas
 npm install
-
-# Copiar variables de entorno
-cp .env.example .env.local
 ```
 
 ### 2. Configurar Firebase
 
 1. Crear proyecto en [Firebase Console](https://console.firebase.google.com/)
-2. Habilitar Authentication (Email/Password, Google)
+2. Habilitar Authentication (Email/Password)
 3. Crear base de datos Firestore
-4. Crear bucket de Storage
-5. Generar claves de Service Account
+4. Generar claves de Service Account
 
-### 3. Configurar variables de entorno
+### 3. Variables de entorno
 
-Editar `.env.local`:
+Crear `.env.local`:
 
 ```env
 # Firebase Client SDK (público)
@@ -64,16 +62,17 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef
 FIREBASE_PROJECT_ID=tu-proyecto
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk@tu-proyecto.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-FIREBASE_STORAGE_BUCKET=tu-proyecto.appspot.com
 ```
 
-### 4. Deploy de reglas y índices
+### 4. Crear Super Admin
 
 ```bash
-firebase login
-firebase use --add  # Seleccionar tu proyecto
-firebase deploy --only firestore:rules,firestore:indexes,storage
+node scripts/create-super-admin.js
 ```
+
+Usuario de prueba:
+- Email: `sergio@empresa.com`
+- Password: `Sergio123`
 
 ### 5. Ejecutar en desarrollo
 
@@ -83,138 +82,194 @@ npm run dev
 
 Abrir [http://localhost:3000](http://localhost:3000)
 
+---
+
 ## 📁 Estructura del Proyecto
 
 ```
-proyecto-base/
+don-candido-finanzas/
 ├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── (auth)/               # Páginas de autenticación
-│   │   │   ├── login/
-│   │   │   └── register/
-│   │   ├── (dashboard)/          # Páginas protegidas
-│   │   │   ├── layout.tsx        # Layout con sidebar
-│   │   │   ├── dashboard/
-│   │   │   ├── roadmap/
-│   │   │   └── contabilidad/
-│   │   └── api/                  # API Routes
-│   ├── components/               # Componentes React
-│   │   └── ui/                   # Componentes UI base
-│   ├── contexts/                 # React Contexts
-│   │   ├── AuthContext.tsx
-│   │   └── OrganizationContext.tsx
-│   ├── firebase/                 # Configuración Firebase
-│   │   ├── config.ts             # Client SDK
-│   │   ├── admin.ts              # Admin SDK
-│   │   └── auth.ts               # Auth helpers
-│   ├── lib/                      # Utilidades
-│   ├── services/                 # Lógica de negocio
-│   │   ├── auth/
-│   │   ├── organization/
-│   │   ├── roadmap/
-│   │   └── accounting/
-│   └── types/                    # Tipos TypeScript
-├── firestore.rules               # Reglas de seguridad
-├── firestore.indexes.json        # Índices compuestos
-├── storage.rules                 # Reglas de storage
-└── firebase.json                 # Configuración Firebase
+│   ├── app/
+│   │   ├── (auth)/              # Login/Register
+│   │   ├── (dashboard)/         # Páginas protegidas
+│   │   │   ├── operaciones/     # Formularios de operaciones
+│   │   │   ├── movimientos/     # Historial de asientos
+│   │   │   ├── terceros/        # Clientes/Proveedores
+│   │   │   └── productos/       # Gestión de productos
+│   │   └── api/                 # API Routes
+│   ├── components/
+│   │   ├── operaciones/         # Modales de operaciones
+│   │   ├── terceros/            # Componentes de terceros
+│   │   ├── stock/               # Componentes de stock
+│   │   ├── stock/               # Componentes de stock
+│   │   ├── landing/             # Componentes de Landing Page [NUEVO]
+│   │   └── ui/                  # Componentes base
+│   ├── services/
+│   │   └── accounting/          # Lógica contable
+│   │       ├── asientos-auto.ts
+│   │       ├── terceros.ts
+│   │       ├── cuentas-bancarias.ts
+│   │       └── stock.ts
+│   └── types/
+│       ├── contabilidad-auto.ts # Tipos contables
+│       ├── stock.ts             # Tipos de stock
+│       └── products.ts          # Tipos de productos
+├── ultimas-tareas.md            # Resumen de trabajo realizado
+└── README.md
 ```
 
-## 🔐 Sistema Multi-Tenant
+---
 
-### Roles de Usuario
+## 💰 Sistema Contable
 
-| Rol        | Permisos                             |
-| ---------- | ------------------------------------ |
-| `owner`    | Control total, eliminar organización |
-| `admin`    | Gestionar miembros, configuración    |
-| `operator` | Leer y escribir datos                |
-| `viewer`   | Solo lectura                         |
+### Operaciones Implementadas
 
-### Estructura de Datos
+| Operación | Estado | Asiento Generado |
+|-----------|--------|------------------|
+| **Ingreso de Dinero** | ✅ | Debe: Caja/Banco → Haber: Ingreso |
+| **Gasto/Pago** | ✅ | Debe: Gasto → Haber: Caja/Banco |
+| **Entrada de Mercadería** | ✅ | Debe: Compras → Haber: Proveedores + Stock |
+| **Compra a Crédito** | ✅ | Debe: Gasto → Haber: Proveedores |
+| **Pago de Deuda** | ✅ | Debe: Proveedores → Haber: Caja/Banco |
+| Venta de Producto | ⏳ | Debe: Clientes → Haber: Ventas - Stock |
+| Cobro de Cliente | ⏳ | Debe: Caja/Banco → Haber: Clientes |
+| Transferencia | ⏳ | Debe: Cuenta Destino → Haber: Cuenta Origen |
+
+### Plan de Cuentas Simplificado
 
 ```
-/users/{userId}                          # Perfil global
-/organizations/{orgId}                   # Organización
-  /members/{memberId}                    # Miembros y roles
-  /invitations/{invitationId}            # Invitaciones
-  /roadmap_cards/{cardId}                # Tareas Kanban
-  /accounts/{accountId}                  # Plan de cuentas
-  /journal_entries/{entryId}             # Asientos contables
-  /products/{productId}                  # Productos
-  /stock_movements/{movementId}          # Movimientos de stock
+ACTIVO
+├── Caja
+├── Bancos
+├── Clientes
+└── Stock de Mercadería
+
+PASIVO
+└── Proveedores
+
+PATRIMONIO NETO
+└── Capital
+
+RESULTADOS
+├── Ingresos
+│   ├── Ventas
+│   └── Otros Ingresos
+└── Gastos
+    ├── Compras de Mercadería
+    ├── Servicios
+    ├── Alquileres
+    └── Gastos Varios
 ```
 
-## 📜 Scripts Disponibles
+### Colecciones Firestore
+
+```
+/organizations/{orgId}
+  /asientos_auto/          ← Asientos contables
+  /terceros/               ← Clientes/Proveedores
+  /movimientos_terceros/   ← Historial de movimientos
+  /cuentas_bancarias/      ← Caja/Bancos
+  /movimientos_caja_banco/ ← Historial de movimientos
+  /products/               ← Productos
+  /facturas_compra/        ← Facturas de compra
+  /movimientos_stock/      ← Movimientos de stock
+```
+
+---
+
+## 🎯 Flujo de Operaciones
+
+```
+Usuario → Formulario de Operación
+    ↓
+generarAsientoAutomatico()
+    ↓
+├── Genera Líneas de Asiento (Debe/Haber)
+├── Valida Doble Partida
+├── Actualiza Colecciones Auxiliares
+│   ├── Terceros (saldos)
+│   ├── Cuentas Bancarias (saldos)
+│   └── Stock (cantidades)
+└── Guarda Asiento en Firestore
+```
+
+---
+
+## 📝 Scripts Disponibles
 
 ```bash
 # Desarrollo
-npm run dev           # Servidor de desarrollo
-npm run dev:turbo     # Con Turbopack (más rápido)
+npm run dev              # Servidor de desarrollo
 
 # Build
-npm run build         # Build de producción
-npm run start         # Servidor de producción
+npm run build            # Build de producción
+npm run start            # Servidor de producción
 
 # Calidad de código
-npm run lint          # ESLint
-npm run lint:fix      # ESLint con auto-fix
-npm run format        # Prettier
-npm run type-check    # TypeScript
-npm run check-all     # Todo junto
+npm run lint             # ESLint
+npm run type-check       # TypeScript
 
-# Testing
-npm run test          # Jest
-npm run test:watch    # Jest en modo watch
-npm run test:e2e      # Playwright
-
-# Firebase
-npm run emulators     # Emuladores locales
+# Utilidades
+node scripts/create-super-admin.js  # Crear usuario admin
 ```
 
-## 🧪 Testing
+---
 
-### Unit Tests
+## 📊 Tareas Pendientes
 
-```bash
-npm run test
-```
+Ver roadmap completo en: [docs-9001app](http://localhost:3001/roadmaps)  
+Filtrar por proyecto: **don-candido-finanzas**
 
-### E2E Tests
+### Prioridad Alta
+- [ ] Venta de Productos con Stock
+- [ ] Cobro de Cliente
+- [ ] Dashboard Financiero
+- [ ] Validación de Totales Contables
 
-```bash
-npm run test:e2e
-# o con UI
-npm run test:e2e:ui
-```
+### Prioridad Media
+- [ ] Transferencia entre Cuentas
+- [ ] Reportes Básicos
+- [ ] Cargar Proveedores Reales en Modales
+- [ ] Testing E2E
 
-## 🚀 Deployment
+### Prioridad Baja
+- [ ] Índices de Firestore
+- [ ] Sistema de Tarjetas de Crédito (App Separada)
 
-### Vercel (Recomendado)
+---
 
-1. Conectar repositorio en [Vercel](https://vercel.com)
-2. Configurar variables de entorno
-3. Deploy automático en cada push
+## 📚 Documentación
 
-### Firebase Hosting
+- [Resumen de Últimas Tareas](./ultimas-tareas.md)
+- [Walkthrough Completo](file:///C:/Users/Usuario/.gemini/antigravity/brain/9f2701e2-561f-48c8-8fcd-1226cf03f7b0/walkthrough.md)
+- [Plan de Implementación](file:///C:/Users/Usuario/.gemini/antigravity/brain/9f2701e2-561f-48c8-8fcd-1226cf03f7b0/implementation_plan.md)
 
-```bash
-npm run build
-firebase deploy --only hosting
-```
+---
 
-## 📝 Cómo crear un nuevo proyecto
+## 🔗 Proyectos Relacionados
 
-1. Clonar este template
-2. Renombrar en `package.json`
-3. Crear nuevo proyecto en Firebase
-4. Configurar variables de entorno
-5. Personalizar:
-   - Logo y branding
-   - Colores en `globals.css`
-   - Rutas y componentes
-   - Reglas de Firestore según necesidades
+- **docs-9001app**: Sistema de roadmap centralizado (puerto 3001)
+- **sig-agro**: Proyecto de referencia para contabilidad automática
+
+---
+
+## 👥 Contexto del Negocio
+
+**Tipo de Negocio:** Venta de Electrodomésticos (Retail)
+
+**Características:**
+- Gestión de stock de productos
+- Compra a proveedores con factura
+- Venta a clientes (efectivo y cuenta corriente)
+- Control de caja y bancos
+- Gestión de deudas y cobros
+
+---
 
 ## 📄 Licencia
 
 Privado - Todos los derechos reservados
+
+---
+
+**Última actualización:** 19 de Diciembre de 2024

@@ -75,15 +75,25 @@ export default function RegisterPage() {
       router.push('/dashboard');
     } catch (err: unknown) {
       console.error('Registration error:', err);
+      // Log full error details for debugging
+      if (err && typeof err === 'object') {
+        console.error('Error code:', (err as any).code);
+        console.error('Error message:', (err as any).message);
+      }
       if (err instanceof Error) {
-        if (err.message.includes('email-already-in-use')) {
+        const errorCode = (err as any).code || '';
+        if (errorCode === 'auth/email-already-in-use' || err.message.includes('email-already-in-use')) {
           setError('Este email ya está registrado');
-        } else if (err.message.includes('weak-password')) {
+        } else if (errorCode === 'auth/weak-password' || err.message.includes('weak-password')) {
           setError('La contraseña es muy débil');
-        } else if (err.message.includes('invalid-email')) {
+        } else if (errorCode === 'auth/invalid-email' || err.message.includes('invalid-email')) {
           setError('Email inválido');
+        } else if (errorCode === 'auth/operation-not-allowed') {
+          setError('Registro con email/contraseña no está habilitado. Habilita Email/Password en Firebase Console → Authentication → Sign-in method');
+        } else if (errorCode === 'auth/configuration-not-found') {
+          setError('Configuración de Firebase incorrecta. Verifica las credenciales en .env.local');
         } else {
-          setError('Error al registrar. Intenta nuevamente.');
+          setError(`Error: ${errorCode || err.message}`);
         }
       } else {
         setError('Error al registrar. Intenta nuevamente.');

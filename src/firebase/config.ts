@@ -16,15 +16,19 @@ const firebaseConfig = {
 };
 
 // Validate configuration
-if (
-  !firebaseConfig.apiKey ||
-  !firebaseConfig.authDomain ||
-  !firebaseConfig.projectId
-) {
-  console.error('Firebase configuration is missing required fields');
-  console.error(
-    'Make sure to set NEXT_PUBLIC_FIREBASE_* environment variables'
-  );
+const missingFields = [];
+if (!firebaseConfig.apiKey) missingFields.push('NEXT_PUBLIC_FIREBASE_API_KEY');
+if (!firebaseConfig.authDomain) missingFields.push('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN');
+if (!firebaseConfig.projectId) missingFields.push('NEXT_PUBLIC_FIREBASE_PROJECT_ID');
+
+if (missingFields.length > 0) {
+  console.error('⚠️ Firebase configuration is missing required fields:');
+  console.error('Missing:', missingFields.join(', '));
+  console.error('📋 Steps to fix:');
+  console.error('1. Go to Firebase Console > Project Settings > General > Your apps');
+  console.error('2. Copy the firebaseConfig values');
+  console.error('3. Create/update .env.local with the values (see .env.example)');
+  console.error('4. Restart the dev server');
 }
 
 // Initialize Firebase (singleton pattern)
@@ -36,10 +40,12 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Analytics only on client side
-export const analytics =
-  typeof window !== 'undefined'
-    ? isSupported().then(yes => (yes ? getAnalytics(app) : null))
-    : null;
+// Analytics disabled temporarily (enable when app is more stable)
+// To enable: uncomment the code below and enable Analytics in Firebase Console
+export const analytics = null;
+// export const analytics =
+//   typeof window !== 'undefined'
+//     ? isSupported().then(yes => (yes ? getAnalytics(app) : null))
+//     : null;
 
 export default app;

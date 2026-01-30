@@ -25,6 +25,7 @@ function LoginForm() {
     try {
       await signIn(email, password);
       router.push(redirectUrl);
+    } catch (err: unknown) {
       console.error('Login error:', err);
       // Detailed error for debugging
       const errorCode = (err as any)?.code || '';

@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 
 interface MenuItem {
   name: string;
@@ -45,7 +45,7 @@ const navigation: MenuItem[] = [
     children: [
       { name: 'Productos', href: '/dashboard/productos', icon: Package },
       { name: 'Ventas (POS)', href: '/dashboard/ventas', icon: ShoppingCart },
-      { name: 'Caja', href: '/dashboard/caja', icon: Wallet }, // Using Wallet as placeholder for Cashbox
+      { name: 'Caja', href: '/dashboard/caja', icon: Wallet },
     ],
   },
 
@@ -167,55 +167,30 @@ export const Sidebar = memo(function Sidebar() {
       if (pathname === item.href) return true;
       if (item.children?.some(child => pathname === child.href)) return true;
       return false;
+      return false;
     },
     [pathname]
   );
 
   return (
     <div
-      className={`transition-[width] duration-200 ease-in-out flex-shrink-0 ${collapsed ? 'w-24' : 'w-72'}`}
+      className={`transition-[width] duration-300 ease-in-out flex-shrink-0 ${collapsed ? 'w-20' : 'w-72'}`}
     >
       <div
-        className={`sidebar-container bg-slate-800 text-white h-[calc(100vh-2rem)] flex flex-col transition-all duration-200 ease-in-out overflow-hidden mx-4 my-4 rounded-xl shadow-2xl ${collapsed ? 'w-16' : 'w-64'}`}
-        style={{
-          position: 'fixed',
-          zIndex: 40,
-        }}
+        className={`sidebar-container bg-slate-950/95 backdrop-blur-xl border-r border-slate-800/50 text-slate-300 h-screen flex flex-col transition-all duration-300 ease-in-out fixed top-0 left-0 z-50 ${collapsed ? 'w-20' : 'w-72'}`}
       >
         {/* Logo Section */}
-        <div className="p-4 border-b border-slate-700/50">
-          <div className="flex items-center justify-center min-h-[40px]">
-            {collapsed ? (
-              <Logo variant="light" size="sm" showText={false} />
-            ) : (
-              <Logo variant="light" size="sm" showText={true} />
-            )}
+        <div className="h-16 flex items-center justify-center border-b border-slate-800/50">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <span className="text-white font-bold text-lg">D</span>
+            </div>
+            {!collapsed && <span className="font-bold text-white text-lg tracking-tight">Don Cándido</span>}
           </div>
         </div>
 
-        {/* Collapse Button */}
-        <div className="flex justify-end p-2">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-all"
-          >
-            {collapsed ? (
-              <SafeIcon
-                Icon={ChevronRight}
-                className="h-4 w-4"
-                isMounted={isMounted}
-              />
-            ) : (
-              <SafeIcon
-                Icon={ChevronLeft}
-                className="h-4 w-4"
-                isMounted={isMounted}
-              />
-            )}
-          </button>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto px-3 py-4 scrollbar-hide space-y-1">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-6 px-3 scrollbar-hide space-y-1.5">
           {navigation.map(item => {
             const isActive = isMenuActive(item);
             const hasChildren = item.children && item.children.length > 0;
@@ -224,95 +199,97 @@ export const Sidebar = memo(function Sidebar() {
             return (
               <div key={item.name}>
                 {hasChildren ? (
-                  <button
-                    onClick={() => toggleMenu(item.name)}
-                    className={`w-full group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      isActive
-                        ? 'bg-blue-600/10 text-blue-400'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                    }`}
-                  >
-                    <SafeIcon
-                      Icon={item.icon}
-                      className={`${collapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-blue-500' : ''}`}
-                      isMounted={isMounted}
-                    />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left">{item.name}</span>
-                        <SafeIcon
-                          Icon={isExpanded ? ChevronUp : ChevronDown}
-                          className="h-4 w-4 opacity-50"
-                          isMounted={isMounted}
-                        />
-                      </>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`w-full group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive
+                          ? 'bg-blue-600/10 text-blue-400'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                        }`}
+                    >
+                      <SafeIcon
+                        Icon={item.icon}
+                        className={`${collapsed ? 'mx-auto' : 'mr-3'} h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-blue-500' : ''}`}
+                        isMounted={isMounted}
+                      />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1 text-left">{item.name}</span>
+                          <SafeIcon
+                            Icon={isExpanded ? ChevronUp : ChevronDown}
+                            className="h-4 w-4 opacity-50"
+                            isMounted={isMounted}
+                          />
+                        </>
+                      )}
+                    </button>
+                    {/* Submenu */}
+                    {hasChildren && isExpanded && !collapsed && (
+                      <div className="ml-4 pl-4 border-l border-slate-800 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                        {item.children!.map(child => {
+                          const isChildActive = pathname === child.href;
+                          return (
+                            <Link
+                              key={child.name}
+                              href={child.href}
+                              className={`group flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${isChildActive
+                                  ? 'bg-blue-600/20 text-blue-300'
+                                  : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/30'
+                                }`}
+                            >
+                              <SafeIcon
+                                Icon={child.icon}
+                                className="mr-3 h-4 w-4 flex-shrink-0 opacity-70"
+                                isMounted={isMounted}
+                              />
+                              {child.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
                     )}
-                  </button>
+                  </div>
                 ) : (
                   <Link
                     href={item.href}
-                    className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      isActive
-                        ? 'bg-blue-600 shadow-md shadow-blue-900/20 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                    }`}
+                    className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-500/20 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                      }`}
                   >
                     <SafeIcon
                       Icon={item.icon}
-                      className={`${collapsed ? 'mr-0' : 'mr-3'} h-5 w-5 flex-shrink-0`}
+                      className={`${collapsed ? 'mx-auto' : 'mr-3'} h-5 w-5 flex-shrink-0`}
                       isMounted={isMounted}
                     />
                     {!collapsed && item.name}
                   </Link>
-                )}
-
-                {/* Submenú */}
-                {hasChildren && isExpanded && !collapsed && (
-                  <div className="ml-4 mt-1 pl-4 border-l border-slate-700/50 space-y-1">
-                    {item.children!.map(child => {
-                      const isChildActive = pathname === child.href;
-                      return (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          className={`group flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
-                            isChildActive
-                              ? 'bg-blue-600/20 text-blue-100'
-                              : 'text-slate-500 hover:text-slate-200 hover:bg-slate-700/30'
-                          }`}
-                        >
-                          <SafeIcon
-                            Icon={child.icon}
-                            className="mr-3 h-4 w-4 flex-shrink-0 opacity-70"
-                            isMounted={isMounted}
-                          />
-                          {child.name}
-                        </Link>
-                      );
-                    })}
-                  </div>
                 )}
               </div>
             );
           })}
         </nav>
 
-        {/* User Profile */}
-        {!collapsed && (
-          <div className="p-4 border-t border-slate-700/50 bg-slate-900/30">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-bold border border-slate-600">
-                {user?.email?.[0].toUpperCase() || 'U'}
-              </div>
-              <div className="flex-1 min-w-0">
+        {/* User Profile Footer */}
+        <div className="p-4 border-t border-slate-800/50 bg-slate-900/50">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/50 transition-colors"
+          >
+            <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+              {user?.email?.[0].toUpperCase() || 'U'}
+            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium text-white truncate">
                   {user?.displayName || 'Usuario'}
                 </p>
-                <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                <p className="text-xs text-slate-500 truncate font-mono">{user?.email}</p>
               </div>
-            </div>
-          </div>
-        )}
+            )}
+            {!collapsed && <ChevronRight className="h-4 w-4 text-slate-500" />}
+          </button>
+        </div>
       </div>
     </div>
   );

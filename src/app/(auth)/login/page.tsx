@@ -25,11 +25,11 @@ function LoginForm() {
     try {
       await signIn(email, password);
       router.push(redirectUrl);
-    } catch (err: unknown) {
-      console.error('Login error:', err);
+    } catch (error: any) {
+      console.error('Login error:', error);
       // Detailed error for debugging
-      const errorCode = (err as any)?.code || '';
-      const errorMessage = (err as any)?.message || 'Error desconocido';
+      const errorCode = error?.code || '';
+      const errorMessage = error?.message || 'Error desconocido';
 
       if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
         setError('Email o contraseña incorrectos.');
